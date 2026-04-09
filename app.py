@@ -1,126 +1,41 @@
-import streamlit as st
+"""
+app.py
+Smart Career Path Recommender for CSE Students
+-----------------------------------------------
+Entry point for the application.
 
-from ui.input_form import collect_input
+Wires all four modules together in the correct order:
+    1. collect_input()       →  student_profile dict
+    2. recommend_careers()   →  top 3 careers with match %
+    3. generate_output()     →  full advanced output report
+    4. display_output()      →  renders the styled result screen
+
+Run with:
+    streamlit run app.py
+"""
+
+from ui.input_form           import collect_input
 from logic.similarity_engine import recommend_careers
-from logic.output_engine import generate_output
+from logic.output_engine     import generate_output
+from ui.output_display       import display_output
 
 
-# ---------------------------------------------------
-# Page Config
-# ---------------------------------------------------
-st.set_page_config(
-    page_title="Smart Career Path Recommender",
-    layout="wide"
-)
-
-
-# ---------------------------------------------------
-# Main Title
-# ---------------------------------------------------
-st.title("Smart Career Path Recommender for CSE Students")
-
-st.markdown(
-    "Fill the assessment form below to receive your personalized career analysis report."
-)
-
-
-# ---------------------------------------------------
-# Collect Input
-# collect_input already contains your original submit button
-# ---------------------------------------------------
+# ── Step 1: Render the input form and collect student answers ──
+# Returns a filled dictionary when the student clicks submit.
+# Returns None while the form is still being filled.
 student_profile = collect_input()
 
 
-# ---------------------------------------------------
-# Only run after collect_input returns actual dictionary
-# ---------------------------------------------------
+# ── Step 2: Run the recommendation pipeline after submission ──
 if student_profile is not None:
 
-    # Step 1
+    # Step 2a: Compute cosine similarity against dataset
+    # Returns: [("Career Name", percent), ...]
     top_careers = recommend_careers(student_profile)
 
-    # Step 2
+    # Step 2b: Generate the full output report using rule-based logic
+    # Returns: dict with all 10 output keys
     advanced_output = generate_output(top_careers, student_profile)
 
-    # ---------------------------------------------------
-    # Official Output Header
-    # ---------------------------------------------------
-    st.header("Your Personalized Career Analysis Report")
-
-    st.write(
-        "Based on your technical profile, learning style, and career preferences, "
-        "here are your strongest career matches."
-    )
-
-    # ---------------------------------------------------
-    # Top 3 Career Recommendations
-    # ---------------------------------------------------
-    st.subheader("Top 3 Career Recommendations")
-
-    for career, score in advanced_output["top_careers"]:
-        reason = advanced_output["career_reason"].get(career, "")
-
-        st.write(f"**{career} — {score}%**")
-        st.write(f"Reason: {reason}")
-        st.write("---")
-
-    # ---------------------------------------------------
-    # Confidence Note
-    # ---------------------------------------------------
-    st.subheader("Confidence Insight")
-    st.write(advanced_output["confidence_note"])
-
-    # ---------------------------------------------------
-    # Best Fit Explanation
-    # ---------------------------------------------------
-    st.subheader("Best Fit Explanation")
-    st.write(advanced_output["best_fit"])
-
-    # ---------------------------------------------------
-    # Skill Gap Analysis
-    # ---------------------------------------------------
-    st.subheader("Skill Gap Analysis")
-
-    st.write("**Current Strengths:**")
-    for item in advanced_output["skill_gap"]["strengths"]:
-        st.write(f"- {item}")
-
-    st.write("**Skills to Improve:**")
-    for item in advanced_output["skill_gap"]["improvements"]:
-        st.write(f"- {item}")
-
-    # ---------------------------------------------------
-    # Action Plan
-    # ---------------------------------------------------
-    st.subheader("30 / 60 / 90 Day Action Plan")
-
-    st.write(f"**30 Days:** {advanced_output['action_plan']['30_days']}")
-    st.write(f"**60 Days:** {advanced_output['action_plan']['60_days']}")
-    st.write(f"**90 Days:** {advanced_output['action_plan']['90_days']}")
-
-    # ---------------------------------------------------
-    # Roadmap Link
-    # ---------------------------------------------------
-    st.subheader("Professional Roadmap")
-    st.write(advanced_output["roadmap_link"])
-
-    # ---------------------------------------------------
-    # Reality Layer
-    # ---------------------------------------------------
-    st.subheader("Career Reality")
-
-    st.write(f"Difficulty: {advanced_output['reality']['difficulty']}")
-    st.write(f"Preparation Time: {advanced_output['reality']['prep_time']}")
-    st.write(f"Entry Role: {advanced_output['reality']['entry_role']}")
-
-    # ---------------------------------------------------
-    # Backup Career
-    # ---------------------------------------------------
-    st.subheader("Backup Career Suggestion")
-    st.write(advanced_output["backup"])
-
-    # ---------------------------------------------------
-    # Closing Message
-    # ---------------------------------------------------
-    st.subheader("Personalized Closing Advice")
-    st.write(advanced_output["closing"])
+    # Step 2c: Render the complete styled result screen
+    display_output(advanced_output)
