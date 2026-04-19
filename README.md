@@ -185,3 +185,13 @@ Possible future enhancements:
 * stronger adaptive output personalization
 * dashboard analytics
 * export recommendation report
+
+---
+
+## 📜 License
+
+This project is licensed under the MIT License.
+
+The source code is provided for academic and educational use under open-source licensing conditions.
+
+See LICENSE file for full details.
